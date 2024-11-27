@@ -36,12 +36,8 @@ Build a multiprocessing system to:\
 		Transaction chunks ensure balanced workload distribution.
 
   # How It Works:
-  	1.	Generate Transactions:
-Simulates a batch of 1000 transactions with random values.
-	2.	Divide and Conquer:
-Transactions are split into equal-sized chunks for parallel processing.
-	3.	Fraud Detection:
-Each process applies fraud detection rules on its assigned chunk.
-	4.	Aggregate Results:
-The detected fraudulent transactions are aggregated and printed
+  	1.Generate Transactions: Simulates a batch of 1000 transactions with random values.\
+	2.Divide and Conquer: Transactions are split into equal-sized chunks for parallel processing.\
+	3.Fraud Detection: Each process applies fraud detection rules on its assigned chunk.\
+	4.Aggregate Results: The detected fraudulent transactions are aggregated and printed
 
