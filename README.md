@@ -24,17 +24,16 @@ Build a multiprocessing system to:\
 	3.	Combine the flagged results from all processes into a centralized log for further review.
 
    # Key Features:
-
-	1.	Fraud Rules:
-	•	Large transaction amount.
-	•	Rapid transactions (mock condition based on timestamp).
-	•	Transactions from an unusual location.
-	2.	Multiprocessing:
-	•	The transactions are split into chunks, and each chunk is processed by a separate process.
-	•	Results from each process are collected in a multiprocessing queue.
-	3.	Scalable Design:
-	•	Number of processes can be adjusted based on the system’s CPU capacity.
-	•	Transaction chunks ensure balanced workload distribution.
+	1.Fraud Rules:
+		Large transaction amount.
+		Rapid transactions (mock condition based on timestamp).
+		Transactions from an unusual location.
+	2.Multiprocessing:
+		The transactions are split into chunks, and each chunk is processed by a separate process.
+		Results from each process are collected in a multiprocessing queue.
+	3.Scalable Design:
+		Number of processes can be adjusted based on the system’s CPU capacity.
+		Transaction chunks ensure balanced workload distribution.
 
 
 
