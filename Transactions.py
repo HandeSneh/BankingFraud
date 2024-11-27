@@ -3,9 +3,16 @@ import random
 import time
 
 
-# Sample transaction structure: (transaction_id, account_id, amount, location, timestamp)
 def generate_transactions(num_transactions):
-    """Generate a list of random transactions."""
+    """
+    Generate a list of random transactions.
+
+    Args:
+        num_transactions (int): Number of transactions to generate.
+
+    Returns:
+        list: A list of transaction dictionaries.
+    """
     locations = ["NY", "CA", "TX", "FL", "NV"]
     return [
         {
@@ -20,65 +27,132 @@ def generate_transactions(num_transactions):
 
 
 def fraud_detection_rules(transaction):
-    """Check for fraud based on simple rules."""
-    rules = {
-        "large_amount": transaction["amount"] > 4000,
-        "rapid_transaction": transaction["timestamp"] % 10 == 0,  # Mock rapid check
-        "unusual_location": transaction["location"] == "NV",  # Mock unusual location
-    }
-    # A transaction is fraudulent if any rule is triggered
-    is_fraudulent = any(rules.values())
-    return transaction["transaction_id"], is_fraudulent, rules
+    """
+    Apply fraud detection rules to a transaction.
+
+    Args:
+        transaction (dict): A transaction dictionary.
+
+    Returns:
+        tuple: A tuple containing transaction ID, a flag indicating fraud, 
+               and the rules triggered.
+    """
+    try:
+        rules = {
+            "large_amount": transaction["amount"] > 4000,
+            "rapid_transaction": transaction["timestamp"] % 10 == 0,  # Mock condition
+            "unusual_location": transaction["location"] == "NV",  # Mock unusual location
+        }
+        is_fraudulent = any(rules.values())
+        return transaction["transaction_id"], is_fraudulent, rules
+    except KeyError as e:
+        print(f"Transaction is missing a key: {e}")
+        raise
+    except Exception as e:
+        print(f"Unexpected error in fraud_detection_rules: {e}")
+        raise
 
 
 def process_transactions(transactions_chunk, results_queue):
-    """Process a chunk of transactions and check for fraud."""
-    results = []
-    for transaction in transactions_chunk:
-        transaction_id, is_fraudulent, rules = fraud_detection_rules(transaction)
-        if is_fraudulent:
-            results.append({"transaction_id": transaction_id, "rules_triggered": rules})
-    results_queue.put(results)
+    """
+    Process a chunk of transactions and check for fraud.
+
+    Args:
+        transactions_chunk (list): A list of transactions to process.
+        results_queue (multiprocessing.Queue): Queue to store the results.
+    """
+    try:
+        results = []
+        for transaction in transactions_chunk:
+            transaction_id, is_fraudulent, rules = fraud_detection_rules(transaction)
+            if is_fraudulent:
+                results.append({"transaction_id": transaction_id, "rules_triggered": rules})
+        results_queue.put(results)
+    except Exception as e:
+        print(f"Error in processing transactions: {e}")
+        results_queue.put([])
+
+
+def divide_transactions(transactions, num_processes):
+    """
+    Divide transactions into chunks for multiprocessing.
+
+    Args:
+        transactions (list): List of transactions.
+        num_processes (int): Number of processes.
+
+    Returns:
+        list: List of transaction chunks.
+    """
+    chunk_size = len(transactions) // num_processes
+    return [transactions[i:i + chunk_size] for i in range(0, len(transactions), chunk_size)]
+
+
+def collect_results(results_queue, num_processes):
+    """
+    Collect results from the multiprocessing queue.
+
+    Args:
+        results_queue (multiprocessing.Queue): Queue containing the results.
+        num_processes (int): Number of processes.
+
+    Returns:
+        list: Combined list of results from all processes.
+    """
+    all_results = []
+    try:
+        for _ in range(num_processes):
+            all_results.extend(results_queue.get())
+    except Exception as e:
+        print(f"Error while collecting results: {e}")
+    return all_results
 
 
 def main():
-    # Generate sample transactions
-    num_transactions = 1000
-    transactions = generate_transactions(num_transactions)
+    """
+    Main function to perform fraud detection using multiprocessing.
 
-    # Divide transactions into chunks for multiprocessing
-    num_processes = 4
-    chunk_size = len(transactions) // num_processes
-    chunks = [
-        transactions[i : i + chunk_size]
-        for i in range(0, len(transactions), chunk_size)
-    ]
+    Steps:
+    1. Generate sample transactions.
+    2. Divide transactions into chunks for parallel processing.
+    3. Process chunks in parallel and collect results.
+    4. Log the fraudulent transactions detected.
+    """
+    try:
+        num_transactions = 1000
+        num_processes = 4
 
-    # Create a multiprocessing queue to collect results
-    results_queue = multiprocessing.Queue()
+        # Step 1: Generate transactions
+        transactions = generate_transactions(num_transactions)
+        print(f"Generated {num_transactions} transactions.")
 
-    # Create and start processes
-    processes = []
-    for chunk in chunks:
-        process = multiprocessing.Process(
-            target=process_transactions, args=(chunk, results_queue)
-        )
-        processes.append(process)
-        process.start()
+        # Step 2: Divide transactions into chunks
+        chunks = divide_transactions(transactions, num_processes)
 
-    # Collect results
-    all_results = []
-    for _ in range(num_processes):
-        all_results.extend(results_queue.get())
+        # Step 3: Initialize multiprocessing
+        results_queue = multiprocessing.Queue()
+        processes = []
+        for chunk in chunks:
+            process = multiprocessing.Process(
+                target=process_transactions, args=(chunk, results_queue)
+            )
+            processes.append(process)
+            process.start()
 
-    # Wait for all processes to complete
-    for process in processes:
-        process.join()
+        # Step 4: Collect results
+        all_results = collect_results(results_queue, len(processes))
 
-    # Print detected frauds
-    print(f"Detected {len(all_results)} fraudulent transactions:")
-    for result in all_results:
-        print(result)
+        # Wait for all processes to complete
+        for process in processes:
+            process.join()
+
+        # Step 5: Log fraudulent transactions
+        print(f"Detected {len(all_results)} fraudulent transactions:")
+        for result in all_results:
+            print(result)
+
+    except Exception as e:
+        print(f"Unexpected error in main: {e}")
 
 
 if __name__ == "__main__":
