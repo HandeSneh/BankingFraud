@@ -9,3 +9,18 @@ Key Concepts: \
 4.Pool: A collection of worker processes that can execute tasks concurrently.\
 5.Queue/Manager: Tools to share data between processes.\
 
+# Problem Statement: Fraud Detection System for Real-Time Transactions
+
+Scenario:
+A bank monitors transactions in real time to detect fraudulent activities. Each transaction is checked against multiple fraud detection rules, such as:\
+	•	Unusual location of the transaction.\
+	•	Large transaction amount compared to account history.\
+	•	Rapid consecutive transactions.\
+
+Task:\
+Build a multiprocessing system to:\
+	1.	Divide the incoming stream of transactions among multiple processes.\
+	2.	Each process applies the fraud detection rules independently.\
+	3.	Combine the flagged results from all processes into a centralized log for further review.
+
+
