@@ -15,7 +15,7 @@ Scenario:
 A bank monitors transactions in real time to detect fraudulent activities. Each transaction is checked against multiple fraud detection rules, such as:\
 	•	Unusual location of the transaction.\
 	•	Large transaction amount compared to account history.\
-	•	Rapid consecutive transactions.\
+	•	Rapid consecutive transactions.
 
 Task:\
 Build a multiprocessing system to:\
