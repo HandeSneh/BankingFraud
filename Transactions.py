@@ -1,6 +1,20 @@
 import multiprocessing
 import random
 import time
+import logging
+
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+# Create a file handler and set the level with 'w' for write mode
+file_handler = logging.FileHandler('my_app.log', mode='w')  
+file_handler.setLevel(logging.INFO)
+# Create a formatter and add it to the handler
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+# Add the handler to the logger
+logger.addHandler(file_handler)
 
 
 def generate_transactions(num_transactions):
@@ -46,10 +60,10 @@ def fraud_detection_rules(transaction):
         is_fraudulent = any(rules.values())
         return transaction["transaction_id"], is_fraudulent, rules
     except KeyError as e:
-        print(f"Transaction is missing a key: {e}")
+        logger.info(f"Transaction is missing a key: {e}")
         raise
     except Exception as e:
-        print(f"Unexpected error in fraud_detection_rules: {e}")
+        logger.info(f"Unexpected error in fraud_detection_rules: {e}")
         raise
 
 
@@ -69,7 +83,7 @@ def process_transactions(transactions_chunk, results_queue):
                 results.append({"transaction_id": transaction_id, "rules_triggered": rules})
         results_queue.put(results)
     except Exception as e:
-        print(f"Error in processing transactions: {e}")
+        logger.info(f"Error in processing transactions: {e}")
         results_queue.put([])
 
 
@@ -104,7 +118,7 @@ def collect_results(results_queue, num_processes):
         for _ in range(num_processes):
             all_results.extend(results_queue.get())
     except Exception as e:
-        print(f"Error while collecting results: {e}")
+        logger.info(f"Error while collecting results: {e}")
     return all_results
 
 
@@ -124,7 +138,7 @@ def main():
 
         # Step 1: Generate transactions
         transactions = generate_transactions(num_transactions)
-        print(f"Generated {num_transactions} transactions.")
+        logger.info(f"Generated {num_transactions} transactions.")
 
         # Step 2: Divide transactions into chunks
         chunks = divide_transactions(transactions, num_processes)
@@ -147,12 +161,12 @@ def main():
             process.join()
 
         # Step 5: Log fraudulent transactions
-        print(f"Detected {len(all_results)} fraudulent transactions:")
+        logger.info(f"Detected {len(all_results)} fraudulent transactions:")
         for result in all_results:
-            print(result)
+            logger.info(result)
 
     except Exception as e:
-        print(f"Unexpected error in main: {e}")
+        logger.info(f"Unexpected error in main: {e}")
 
 
 if __name__ == "__main__":
